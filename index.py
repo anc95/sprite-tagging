@@ -19,6 +19,7 @@ class SpritesTagging():
         origin_image = self.transprent_px_to_balck(origin_image)
         origin_image = cv2.cvtColor(origin_image, cv2.COLOR_RGB2GRAY)
         _, pic = cv2.threshold(src=origin_image, thresh=1, maxval=255, type=0)
+        pic = cv2.medianBlur(pic, 5)
         return pic
 
     # tansform the px width 100% alpha to black
@@ -36,10 +37,12 @@ class SpritesTagging():
     # find contours of black and white image
     def find_contours_on_bw_img(self, img):
         _1, contours, _2 = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-        # for i in xrange(len(contours)):
-        #     x, y, w, h = cv2.boundingRect(contours[i])
-        rect_pic = cv2.drawContours(img, contours, -1, (100, 0, 0), 3)
-        cv2.imshow('', rect_pic)
+        pic = cv2.imread(self.img_source)
+        print(len(contours))
+        for i in xrange(len(contours)):
+            x, y, w, h = cv2.boundingRect(contours[i])
+            origin_pic = cv2.rectangle(pic, (x, y), (x+w, y+h), (255, 0, 0), 1)
+        cv2.imshow('', origin_pic)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
                 
