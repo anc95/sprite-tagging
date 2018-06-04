@@ -13,7 +13,11 @@ class SpritesTagging():
     
     def gen_tagging(self):
         pic = self.gen_gray_img()
-        self.get_reliable_contours(pic)
+        contours = self.get_reliable_contours(pic)
+        pic = self.add_tag_on_img(cv2.imread(self.img_source), contours)
+        cv2.imshow('', pic)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
     
     # only black and white img
     def gen_gray_img(self):
@@ -21,7 +25,6 @@ class SpritesTagging():
         origin_image = self.transprent_px_to_balck(origin_image)
         origin_image = cv2.cvtColor(origin_image, cv2.COLOR_RGB2GRAY)
         _, pic = cv2.threshold(src=origin_image, thresh=100, maxval=255, type=0)
-        # pic = cv2.medianBlur(pic, 5)
         return pic
 
     # tansform the px width 100% alpha to black
@@ -36,13 +39,6 @@ class SpritesTagging():
                     img[i][j] = [0, 0, 0, 0]
         return img
 
-    # find contours of black and white image
-    # def find_contours_on_bw_img(self, img):
-    #     contours = self.get_reliable_contours(img)
-    #     pic = cv2.imread(self.img_source, cv2.IMREAD_UNCHANGED)
-    #     for i in range(len(contours)):
-    #         x, y, w, h = cv2.boundingRect(contours[i])
-    #         origin_pic = cv2.rectangle(pic, (x, y), (x+w, y+h), (255, 0, 0), 1)
 
     def fill_content_inner_gray_img_contours_255(self, img, contours):
         for i in range(len(contours)):
@@ -78,44 +74,16 @@ class SpritesTagging():
         gray_img = self.fill_content_inner_gray_img_contours_255(gray_img, contours)
         
         return self.get_reliable_contours(gray_img)
+    
+    def add_tag_on_img(self, img, contours):
+        for i in range(len(contours)):
+            x, y, w, h = cv2.boundingRect(contours[i])
+            text = 'pos:({}, {})'.format(x, y)
+            print text
+            cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 255), 1)
+        
+        return img
 
                 
 if (__name__ == '__main__'):
     main()
-# [
-#     [
-#         [394 116]
-#     ]
-
-#     [
-#      [394 132]
-#     ]
-
-#  [
-#      [411 132]]
-
-#  [[411 116]]]
-
-
-
-# origin_pic = cv2.imread('./icon.png')
-
-# pic = cv2.cvtColor(origin_pic, cv2.COLOR_BGR2GRAY)
-# # 阈值处理，将前景全填充为白色，背景全填充为黑色
-# _, pic = cv2.threshold(src=pic, thresh=254, maxval=255, type=1)
-# # 中值滤波，去除椒盐噪声
-# pic = cv2.medianBlur(pic, 5)
-# # 边缘检测，得到的轮廓列表
-# _1, contours, _2 = cv2.findContours(pic, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-# # 根据轮廓列表，循环在原始图像上绘制矩形边界
-# print len(contours)
-# for i in range(len(contours)):
-#     cnt = contours[i]
-#     x, y, w, h = cv2.boundingRect(cnt)
-#     origin_pic = cv2.rectangle(origin_pic, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
-# cv2.imwrite('./rectangle.jpg', origin_pic)
-
-# cv2.imshow('', origin_pic)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
