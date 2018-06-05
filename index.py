@@ -1,9 +1,22 @@
 # coding=utf-8
 import cv2
+import argparse
+import matplotlib.pyplot as plt
 
 def main():
-    tagging = SpritesTagging('./icon.png')
-    tagging.gen_tagging()
+    parser = argparse.ArgumentParser(description='generate sprites width tagging')
+    parser.add_argument('img', metavar='img', nargs=1, help="source spirites image")
+    parser.add_argument('-o', dest='output', nargs=1, help='output image')
+    args = parser.parse_args()
+    tagging = SpritesTagging(args.img[0])
+    tag_pic = tagging.gen_tagging()
+
+    if args.output:
+        cv2.imwrite(args.output[0], tag_pic)
+    else:
+        cv2.imshow('image', tag_pic)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 class SpritesTagging():
     def __init__(self, img_source):
@@ -15,9 +28,8 @@ class SpritesTagging():
         pic = self.gen_gray_img()
         contours = self.get_reliable_contours(pic)
         pic = self.add_tag_on_img(cv2.imread(self.img_source), contours)
-        cv2.imshow('', pic)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        
+        return pic
     
     # only black and white img
     def gen_gray_img(self):
@@ -76,11 +88,16 @@ class SpritesTagging():
         return self.get_reliable_contours(gray_img)
     
     def add_tag_on_img(self, img, contours):
+        size = img.shape
+        img = cv2.resize(img, (size[0] * 3, size[1] * 3), interpolation=cv2.INTER_CUBIC)
+
         for i in range(len(contours)):
             x, y, w, h = cv2.boundingRect(contours[i])
-            text = 'pos:({}, {})'.format(x, y)
-            print text
-            cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 255), 1)
+            pos = 'p:{} {}'.format(x, y)
+            size = 's:{} {}'.format(w, h)
+            img = cv2.rectangle(img, (x * 3, y * 3), (x * 3 + w * 3, y * 3 + h * 3), (255, 0, 0), 2)
+            cv2.putText(img, pos, (x * 3, y * 3 + h * 3 + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            cv2.putText(img, size, (x * 3, y * 3 + h * 3 + 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
         
         return img
 
