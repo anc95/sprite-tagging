@@ -1,7 +1,6 @@
 # coding=utf-8
 import cv2
 import argparse
-import matplotlib.pyplot as plt
 
 def main():
     parser = argparse.ArgumentParser(description='generate sprites width tagging')
